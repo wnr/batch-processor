@@ -1,0 +1,19 @@
+{
+  "name": "batch-updater",
+  "version": "0.1.0",
+  "description": "Batch updating in JS",
+  "main": "batch-updater.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wnr/batch-updater.git"
+  },
+  "author": "Lucas Wiener",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/wnr/batch-updater/issues"
+  },
+  "homepage": "https://github.com/wnr/batch-updater"
+}
