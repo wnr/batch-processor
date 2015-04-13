@@ -1,7 +1,7 @@
 {
   "name": "batch-processor",
   "version": "0.2.0",
-  "description": "Batch updating in JS",
+  "description": "Batch processing in JS",
   "main": "src/batch-processor.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
