@@ -3,35 +3,46 @@
 var utils = require("./utils");
 
 module.exports = function batchUpdaterMaker(options) {
-    options = options || {};
-
+    options         = options || {};
     var reporter    = options.reporter;
     var async       = utils.getOption(options, "async", true);
     var autoUpdate  = utils.getOption(options, "auto", true);
 
     if(autoUpdate && !async) {
-        reporter.warn("Invalid options combination. auto=true and async=false is invalid. Setting async=true.");
+        reporter && reporter.warn("Invalid options combination. auto=true and async=false is invalid. Setting async=true.");
         async = true;
     }
 
-    if(!reporter) {
-        throw new Error("Reporter required.");
-    }
+    var batch;
+    var batchSize;
+    var topLevel;
+    var bottomLevel;
 
-    var batchSize = 0;
-    var batch = {};
-    var handler;
+    clearBatch();
 
-    function queueUpdate(element, updater) {
+    var asyncFrameHandler;
+
+    function addFunction(level, fn) {
+        if(!fn) {
+            fn = level;
+            level = 0;
+        }
+
+        if(level > topLevel) {
+            topLevel = level;
+        } else if(level < bottomLevel) {
+            bottomLevel = level;
+        }
+
+        if(!batch[level]) {
+            batch[level] = [];
+        }
+
         if(autoUpdate && async && batchSize === 0) {
             updateBatchAsync();
         }
 
-        if(!batch[element]) {
-            batch[element] = [];
-        }
-
-        batch[element].push(updater);
+        batch[level].push(fn);
         batchSize++;
     }
 
@@ -40,9 +51,9 @@ module.exports = function batchUpdaterMaker(options) {
             updateAsync = async;
         }
 
-        if(handler) {
-            cancelFrame(handler);
-            handler = null;
+        if(asyncFrameHandler) {
+            cancelFrame(asyncFrameHandler);
+            asyncFrameHandler = null;
         }
 
         if(async) {
@@ -53,28 +64,26 @@ module.exports = function batchUpdaterMaker(options) {
     }
 
     function updateBatch() {
-        for(var element in batch) {
-            if(batch.hasOwnProperty(element)) {
-                var updaters = batch[element];
+        for(var level = bottomLevel; level <= topLevel; level++) {
+            var fns = batch[level];
 
-                for(var i = 0; i < updaters.length; i++) {
-                    var updater = updaters[i];
-                    updater();
-                }
+            for(var i = 0; i < fns.length; i++) {
+                var fn = fns[i];
+                fn();
             }
         }
         clearBatch();
     }
 
     function updateBatchAsync() {
-        handler = requestFrame(function performUpdate() {
-            updateBatch();
-        });
+        asyncFrameHandler = requestFrame(updateBatch);
     }
 
     function clearBatch() {
-        batchSize = 0;
-        batch = {};
+        batch           = {};
+        batchSize       = 0;
+        topLevel        = 0;
+        bottomLevel     = 0;
     }
 
     function cancelFrame(listener) {
@@ -90,7 +99,7 @@ module.exports = function batchUpdaterMaker(options) {
     }
 
     return {
-        update: queueUpdate,
+        add: addFunction,
         force: forceUpdateBatch
     };
 };
