@@ -2,13 +2,13 @@
 
 var utils = require("./utils");
 
-module.exports = function batchUpdaterMaker(options) {
+module.exports = function batchProcessorMaker(options) {
     options         = options || {};
     var reporter    = options.reporter;
     var async       = utils.getOption(options, "async", true);
-    var autoUpdate  = utils.getOption(options, "auto", true);
+    var autoProcess = utils.getOption(options, "auto", true);
 
-    if(autoUpdate && !async) {
+    if(autoProcess && !async) {
         reporter && reporter.warn("Invalid options combination. auto=true and async=false is invalid. Setting async=true.");
         async = true;
     }
@@ -38,17 +38,17 @@ module.exports = function batchUpdaterMaker(options) {
             batch[level] = [];
         }
 
-        if(autoUpdate && async && batchSize === 0) {
-            updateBatchAsync();
+        if(autoProcess && async && batchSize === 0) {
+            processBatchAsync();
         }
 
         batch[level].push(fn);
         batchSize++;
     }
 
-    function forceUpdateBatch(updateAsync) {
-        if(updateAsync === undefined) {
-            updateAsync = async;
+    function forceProcessBatch(processAsync) {
+        if(processAsync === undefined) {
+            processAsync = async;
         }
 
         if(asyncFrameHandler) {
@@ -57,13 +57,13 @@ module.exports = function batchUpdaterMaker(options) {
         }
 
         if(async) {
-            updateBatchAsync();
+            processBatchAsync();
         } else {
-            updateBatch();
+            processBatch();
         }
     }
 
-    function updateBatch() {
+    function processBatch() {
         for(var level = bottomLevel; level <= topLevel; level++) {
             var fns = batch[level];
 
@@ -75,8 +75,8 @@ module.exports = function batchUpdaterMaker(options) {
         clearBatch();
     }
 
-    function updateBatchAsync() {
-        asyncFrameHandler = requestFrame(updateBatch);
+    function processBatchAsync() {
+        asyncFrameHandler = requestFrame(processBatch);
     }
 
     function clearBatch() {
@@ -100,6 +100,6 @@ module.exports = function batchUpdaterMaker(options) {
 
     return {
         add: addFunction,
-        force: forceUpdateBatch
+        force: forceProcessBatch
     };
 };

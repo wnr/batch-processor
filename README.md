@@ -1,1 +1,1 @@
-# batch-updater
+# batch-processor
