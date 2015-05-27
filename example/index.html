@@ -1,0 +1,82 @@
+<html>
+    <head>
+        <style>
+            #container div {
+                width: 400px;
+            }
+        </style>
+        <script src="../build/batch-processor.js"></script>
+    </head>
+    <body>
+        <button onclick="resize()">Resize</button>
+        <div id="container"></div>
+        <script>
+            var batchProcessor = BatchProcessor({
+                auto: true,
+                async: true
+              });
+
+            function resize() {
+                function doubleWidth(element, callback) {
+                  var width = element.offsetWidth;
+                  var newWidth = (width * (Math.random() + 0.5)) + "px";
+
+                  batchProcessor.add(function mutateWidth() {
+                    element.style.width = newWidth;
+                  });
+
+                  batchProcessor.add(1, function readHeight() {
+                    var height = element.offsetHeight;
+                    callback(height);
+                  });
+                }
+
+                var elements = document.querySelectorAll("#container div");
+                forEach(elements, function (element) {
+                  doubleWidth(element, function (height) {
+                    //console.log(element, " new height: " + height);
+                  });
+                });
+            }
+
+            function forEach(collection, callback) {
+                for(var i = 0; i < collection.length; i++) {
+                    callback(collection[i], i);
+                }
+            }
+
+            function addDiv(target) {
+                function randomString(length) {
+                    var text = "";
+                    var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+                    for(var i = 0; i < length; i++) {
+                        text += possible.charAt(Math.floor(Math.random() * possible.length));
+                    }
+
+                    return text;
+                }
+
+                var num = Math.floor(Math.random() * 20);
+                var text = "";
+                for(var i = 0; i < num; i++) {
+                    text += randomString(Math.floor(Math.random() * 20)) + " ";
+                }
+
+                var div = document.createElement("div");
+                div.innerHTML = text;
+                div.style.backgroundColor = "rgb(" + Math.floor(Math.random() * 255) + ", " + Math.floor(Math.random() * 100) + ", " + Math.floor(Math.random() * 100) + ")";
+                target.appendChild(div);
+            }
+
+            var target = document.querySelector("#container");
+            for(var i = 0; i < 1000; i++) {
+                addDiv(target);
+            }
+
+            document.addEventListener("DOMContentLoaded", function(event) { 
+                resize();
+            });
+        </script>
+    </body>
+</html>
