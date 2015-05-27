@@ -2,7 +2,7 @@
 
 var utils = require("./utils");
 
-module.exports = function batchProcessorMaker(options) {
+module.exports = function BatchProcessor(options) {
     options         = options || {};
     var reporter    = options.reporter;
     var async       = utils.getOption(options, "async", true);
