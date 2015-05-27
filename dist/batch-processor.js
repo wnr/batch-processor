@@ -1,5 +1,5 @@
 /*!
- * batch-processor 0.2.0 (2015-05-27, 14:23)
+ * batch-processor 0.2.1 (2015-05-27, 14:24)
  * https://github.com/wnr/batch-processor
  * Licensed under MIT
  */
@@ -9,7 +9,7 @@
 
 var utils = require("./utils");
 
-module.exports = function batchProcessorMaker(options) {
+module.exports = function BatchProcessor(options) {
     options         = options || {};
     var reporter    = options.reporter;
     var async       = utils.getOption(options, "async", true);
