@@ -46,9 +46,9 @@ module.exports = function batchProcessorMaker(options) {
         batchSize++;
     }
 
-    function forceProcessBatch(processAsync) {
-        if(processAsync === undefined) {
-            processAsync = async;
+    function forceProcessBatch(localAsyncProcess) {
+        if(localAsyncProcess === undefined) {
+            localAsyncProcess = asyncProcess;
         }
 
         if(asyncFrameHandler) {
@@ -56,7 +56,7 @@ module.exports = function batchProcessorMaker(options) {
             asyncFrameHandler = null;
         }
 
-        if(asyncProcess) {
+        if(localAsyncProcess) {
             processBatchAsync();
         } else {
             processBatch();
