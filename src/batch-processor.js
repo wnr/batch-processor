@@ -3,14 +3,14 @@
 var utils = require("./utils");
 
 module.exports = function batchProcessorMaker(options) {
-    options         = options || {};
-    var reporter    = options.reporter;
-    var async       = utils.getOption(options, "async", true);
-    var autoProcess = utils.getOption(options, "auto", true);
+    options             = options || {};
+    var reporter        = options.reporter;
+    var asyncProcess    = utils.getOption(options, "async", true);
+    var autoProcess     = utils.getOption(options, "auto", true);
 
-    if(autoProcess && !async) {
+    if(autoProcess && !asyncProcess) {
         reporter && reporter.warn("Invalid options combination. auto=true and async=false is invalid. Setting async=true.");
-        async = true;
+        asyncProcess = true;
     }
 
     var batch;
@@ -38,7 +38,7 @@ module.exports = function batchProcessorMaker(options) {
             batch[level] = [];
         }
 
-        if(autoProcess && async && batchSize === 0) {
+        if(autoProcess && asyncProcess && batchSize === 0) {
             processBatchAsync();
         }
 
@@ -56,7 +56,7 @@ module.exports = function batchProcessorMaker(options) {
             asyncFrameHandler = null;
         }
 
-        if(async) {
+        if(asyncProcess) {
             processBatchAsync();
         } else {
             processBatch();
