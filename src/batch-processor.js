@@ -88,13 +88,13 @@ module.exports = function batchProcessorMaker(options) {
 
     function cancelFrame(listener) {
         // var cancel = window.cancelAnimationFrame || window.mozCancelAnimationFrame || window.webkitCancelAnimationFrame || window.clearTimeout;
-        var cancel = window.clearTimeout;
+        var cancel = clearTimeout;
         return cancel(listener);
     }
 
     function requestFrame(callback) {
         // var raf = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || function(fn) { return window.setTimeout(fn, 20); };
-        var raf = function(fn) { return window.setTimeout(fn, 0); };
+        var raf = function(fn) { return setTimeout(fn, 0); };
         return raf(callback);
     }
 
