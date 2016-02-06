@@ -13,40 +13,35 @@ module.exports = function batchProcessorMaker(options) {
         asyncProcess = true;
     }
 
-    var batch;
-    var batchSize;
-    var topLevel;
-    var bottomLevel;
-
-    clearBatch();
-
+    var batch = Batch();
     var asyncFrameHandler;
+    var isProcessing = false;
 
     function addFunction(level, fn) {
-        if(!fn) {
-            fn = level;
-            level = 0;
-        }
+        batch.add(level, fn);
 
-        if(level > topLevel) {
-            topLevel = level;
-        } else if(level < bottomLevel) {
-            bottomLevel = level;
-        }
-
-        if(!batch[level]) {
-            batch[level] = [];
-        }
-
-        if(autoProcess && asyncProcess && batchSize === 0) {
+        if(!isProcessing && autoProcess && asyncProcess && batch.size() === 0) {
             processBatchAsync();
         }
+    }
 
-        batch[level].push(fn);
-        batchSize++;
+    function processBatch() {
+        // Save the current batch, and create a new batch so that incoming functions are not added into the currently processing batch.
+        // Continue processing until the top-level batch is empty (functions may be added to the new batch while processing, and so on).
+        isProcessing = true;
+        while (batch.size()) {
+            var processingBatch = batch;
+            batch = Batch();
+            processingBatch.process();
+        }
+        isProcessing = false;
     }
 
     function forceProcessBatch(localAsyncProcess) {
+        if (isProcessing) {
+            return;
+        }
+
         if(localAsyncProcess === undefined) {
             localAsyncProcess = asyncProcess;
         }
@@ -61,18 +56,6 @@ module.exports = function batchProcessorMaker(options) {
         } else {
             processBatch();
         }
-    }
-
-    function processBatch() {
-        for(var level = bottomLevel; level <= topLevel; level++) {
-            var fns = batch[level];
-
-            for(var i = 0; i < fns.length; i++) {
-                var fn = fns[i];
-                fn();
-            }
-        }
-        clearBatch();
     }
 
     function processBatchAsync() {
@@ -103,3 +86,51 @@ module.exports = function batchProcessorMaker(options) {
         force: forceProcessBatch
     };
 };
+
+function Batch() {
+    var batch       = {};
+    var size        = 0;
+    var topLevel    = 0;
+    var bottomLevel = 0;
+
+    function add(level, fn) {
+        if(!fn) {
+            fn = level;
+            level = 0;
+        }
+
+        if(level > topLevel) {
+            topLevel = level;
+        } else if(level < bottomLevel) {
+            bottomLevel = level;
+        }
+
+        if(!batch[level]) {
+            batch[level] = [];
+        }
+
+        batch[level].push(fn);
+        size++;
+    }
+
+    function process() {
+        for(var level = bottomLevel; level <= topLevel; level++) {
+            var fns = batch[level];
+
+            for(var i = 0; i < fns.length; i++) {
+                var fn = fns[i];
+                fn();
+            }
+        }
+    }
+
+    function getSize() {
+        return size;
+    }
+
+    return {
+        add: add,
+        process: process,
+        size: getSize
+    };
+}
