@@ -59,7 +59,7 @@ describe("BatchProcessor", function () {
             }, 10);
         });
 
-        it("should be able to add functions and process them auto async", function () {
+        it("should be able to add functions and process them auto async", function (done) {
             var bp = BatchProcessor({
                 auto: true,
                 async: true
@@ -81,10 +81,11 @@ describe("BatchProcessor", function () {
 
             setTimeout(function () {
                 test("00112", result);
+                done();
             }, 10);
         });
 
-        it("should report a warning when auto sync, and default to auto async", function () {
+        it("should report a warning when auto sync, and default to auto async", function (done) {
             var warn = "";
 
             var bp = BatchProcessor({
@@ -115,6 +116,7 @@ describe("BatchProcessor", function () {
 
             setTimeout(function () {
                 test("00112", result);
+                done();
             }, 10);
         });
     });
